@@ -1,0 +1,49 @@
+# ===== 密钥 & 环境变量 =====
+.env
+.env.*
+*.key
+*.pem
+*.p12
+*.pfx
+secrets/
+credentials/
+*-credentials.json
+
+# ===== 日志 =====
+*.log
+logs/
+
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+env/
+*.egg
+*.so
+
+# ===== Node / Frontend =====
+node_modules/
+frontend/dist/
+
+# ===== IDE & Editor =====
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ===== Docker =====
+docker-compose.override.yml
+
+# ===== OS Files =====
+Desktop.ini
+
+# ===== Jupyter =====
+.ipynb_checkpoints/
+*.ipynb

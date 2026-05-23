@@ -1,0 +1,29 @@
+# Web Framework
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+
+# Database
+tortoise-orm[asyncpg]>=0.22.0
+asyncpg>=0.30.0
+
+# LangGraph & LLM
+langgraph>=1.2.0
+langgraph-checkpoint-postgres>=2.0.0
+langgraph-checkpoint-sqlite>=2.0.0
+langchain-openai>=0.3.0
+langchain-core>=0.3.0
+langchain-deepseek>=0.2.0
+
+# Voice Services (Volcano Engine)
+# Using HTTP API, no SDK needed
+
+# Search
+langchain-tavily>=0.2.0
+
+# Scheduling
+apscheduler>=3.10.0
+
+# Utilities
+httpx>=0.28.0
+python-dotenv>=1.0.0
+pydantic>=2.0.0

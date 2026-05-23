@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(python -c \"from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver; help\\(AsyncPostgresSaver.aget_tuple\\)\")",
+      "Bash(python -c \"from langgraph.checkpoint.base import Checkpoint; help\\(Checkpoint\\)\")",
+      "Bash(pip install *)",
+      "Bash(mkdir -p __TRACKED_VAR__/.claude/skills)",
+      "Bash(mkdir -p \"E:/Career/pyton_projects/chat_agent521/.claude/skills\")",
+      "Bash(gh --version)",
+      "Bash(netstat -ano)",
+      "Bash(netsh winhttp *)",
+      "Bash(python *)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:www.siliconflow.com)",
+      "Bash(npm install *)",
+      "Bash(npx vite *)",
+      "Bash(curl -s http://localhost:8000/health)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173/)",
+      "Bash(curl -s http://localhost:8000/api/settings)",
+      "Bash(curl -s http://localhost:8000/api/sessions)",
+      "Bash(tasklist /FI \"IMAGENAME eq python.exe\")",
+      "Bash(powershell *)"
+    ]
+  }
+}

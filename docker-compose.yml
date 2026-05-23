@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: voice_chat
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      PG_HOST: postgres
+      PG_PORT: "5432"
+      PG_USER: postgres
+      PG_PASSWORD: postgres
+      PG_DB: voice_chat
+      LLM_MODEL_NAME: deepseek-v4-pro
+      LLM_BASE_URL: https://api.deepseek.com/v1
+      LLM_API_KEY: ""
+      SILICONFLOW_API_KEY: ""
+      TAVILY_API_KEY: ""
+      PROXY_URL: ""
+    depends_on:
+      - postgres
+
+volumes:
+  pgdata:
