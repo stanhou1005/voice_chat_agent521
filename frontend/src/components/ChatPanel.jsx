@@ -5,7 +5,7 @@ import Thinking from './Thinking';
 import useWebSocket from '../hooks/useWebSocket';
 import useRecorder, { _arrayBufferToBase64 } from '../hooks/useRecorder';
 
-export default function ChatPanel({ onOpenSettings }) {
+export default function ChatPanel({ onOpenSettings, onLogout }) {
   const { state, dispatch } = useContext(AppContext);
   const { currentSessionId, error } = state;
   // Per-session state (isolated from other tabs)
@@ -94,9 +94,14 @@ export default function ChatPanel({ onOpenSettings }) {
         <span className="status-indicator" data-status={status}>
           {statusLabel}
         </span>
-        <button className="btn-settings" onClick={onOpenSettings} title="设置">
-          ⚙
-        </button>
+        <div className="header-actions">
+          <button className="btn-settings" onClick={onOpenSettings} title="设置">
+            ⚙
+          </button>
+          <button className="btn-settings" onClick={onLogout} title="退出登录">
+            ↩
+          </button>
+        </div>
       </header>
 
       {error && (

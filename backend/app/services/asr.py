@@ -1,6 +1,7 @@
 """
 SiliconFlow ASR — SenseVoiceSmall (免费).
 OpenAI-compatible endpoint: POST /v1/audio/transcriptions
+**语音识别(ASR - Automatic Speech Recognition)**功能
 """
 
 import httpx

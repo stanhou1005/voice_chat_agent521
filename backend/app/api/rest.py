@@ -4,9 +4,10 @@ Sessions stored in LangGraph Store (long-term memory).
 """
 
 from datetime import datetime, timedelta, timezone
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
 from app.models.settings import Settings
+from app.core.auth import get_current_user
 from app.db.langgraph import get_checkpointer, get_store, STORE_NAMESPACE, STORE_TTL_SECONDS
 
 router = APIRouter(prefix="/api")
@@ -15,7 +16,7 @@ router = APIRouter(prefix="/api")
 # ─── Sessions (LangGraph Store) ────────────────────────────
 
 @router.get("/sessions")
-async def list_sessions(limit: int = 50, offset: int = 0):
+async def list_sessions(limit: int = 50, offset: int = 0, user: dict = Depends(get_current_user)):
     """List historical sessions from LangGraph Store, sorted by last active time."""
     store = get_store()
     items = await store.asearch(STORE_NAMESPACE, limit=limit + offset, offset=0)
@@ -49,7 +50,7 @@ async def list_sessions(limit: int = 50, offset: int = 0):
 
 
 @router.get("/sessions/{session_id}/messages")
-async def get_session_messages(session_id: str):
+async def get_session_messages(session_id: str, user: dict = Depends(get_current_user)):
     """Get message history from LangGraph checkpointer."""
     try:
         checkpointer = get_checkpointer()
@@ -86,7 +87,7 @@ async def get_session_messages(session_id: str):
 
 
 @router.delete("/sessions/{session_id}")
-async def delete_session(session_id: str):
+async def delete_session(session_id: str, user: dict = Depends(get_current_user)):
     """Delete a session: remove from Store and its checkpoint data."""
     store = get_store()
     # 1. Remove from Store
@@ -105,7 +106,7 @@ async def delete_session(session_id: str):
 # ─── Settings ───────────────────────────────────────────────
 
 @router.get("/settings")
-async def get_settings():
+async def get_settings(user: dict = Depends(get_current_user)):
     s = await Settings.get_singleton()
     return {
         "model_name": s.model_name,
@@ -117,7 +118,7 @@ async def get_settings():
 
 
 @router.put("/settings")
-async def update_settings(data: dict):
+async def update_settings(data: dict, user: dict = Depends(get_current_user)):
     s = await Settings.get_singleton()
     for field in ("model_name", "base_url", "api_key", "tavily_key", "proxy_url"):
         if field in data:

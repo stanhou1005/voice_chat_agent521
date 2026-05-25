@@ -76,6 +76,8 @@ body {
   border-bottom: 1px solid #0f3460;
 }
 
+.header-actions { display: flex; gap: 4px; align-items: center; }
+
 .status-indicator {
   font-size: 13px;
   padding: 4px 12px;
@@ -283,3 +285,111 @@ body {
 .btn-close { background: #333; color: #ccc; }
 .btn-close:hover { background: #444; }
 .saved-hint { font-size: 12px; color: #4ade80; margin-left: 8px; }
+
+/* ---- Sidebar user & footer ---- */
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.sidebar-avatar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #fff;
+}
+.sidebar-username { font-size: 13px; color: #ccc; }
+.sidebar-footer { margin-top: auto; padding-top: 8px; border-top: 1px solid #0f3460; }
+.btn-logout {
+  width: 100%;
+  padding: 6px;
+  font-size: 12px;
+  background: none;
+  border: 1px solid #444;
+  border-radius: 6px;
+  color: #888;
+  cursor: pointer;
+}
+.btn-logout:hover { color: #fff; border-color: #888; }
+
+/* ---- Login Page ---- */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: #1a1a2e;
+}
+
+.login-card {
+  background: #1e2a4a;
+  padding: 32px;
+  border-radius: 12px;
+  width: 360px;
+  max-width: 90vw;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.login-card h2 {
+  font-size: 24px;
+  text-align: center;
+  margin-bottom: 4px;
+}
+
+.login-subtitle {
+  font-size: 13px;
+  color: #888;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.login-error {
+  padding: 8px 12px;
+  background: #5c1a1a;
+  color: #ffb0b0;
+  font-size: 13px;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.login-card label {
+  font-size: 12px;
+  color: #888;
+  margin-top: 4px;
+}
+
+.login-card input {
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid #0f3460;
+  background: #16213e;
+  color: #e0e0e0;
+  font-size: 14px;
+}
+
+.login-card input:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+
+.btn-login {
+  margin-top: 12px;
+  padding: 10px;
+  font-size: 15px;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-login:hover { background: #1d4ed8; }
+.btn-login:disabled { opacity: 0.6; cursor: not-allowed; }

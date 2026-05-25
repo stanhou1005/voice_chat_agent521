@@ -1,10 +1,6 @@
 """
 Application configuration.
-Loads from .env file, then environment variables, with fallback defaults.
-
-Two API key lines:
-  - LLM_API_KEY / LLM_BASE_URL → DeepSeek (LangGraph agent)
-  - SILICONFLOW_API_KEY          → SiliconFlow (ASR + TTS)
+Loads from .env file (in CONFIG_DIR or backend/ directory), then environment variables.
 """
 
 import os
@@ -12,8 +8,13 @@ from pathlib import Path
 from dotenv import load_dotenv
 from pydantic import BaseModel
 
-# Load .env from backend/ directory
-load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+# Load .env: Docker mounts config at /config, dev uses backend/
+_config_dir = os.getenv("CONFIG_DIR", str(Path(__file__).resolve().parent.parent))
+_env_path = Path(_config_dir) / ".env"
+if _env_path.exists():
+    load_dotenv(_env_path)
+else:
+    load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 
 class Settings(BaseModel):
@@ -51,6 +52,11 @@ DEEPSEEK_MODEL = os.getenv("LLM_MODEL_NAME", "deepseek-v4-pro")
 # ── SiliconFlow (ASR + TTS) ──────────────────────────────
 SILICONFLOW_API_KEY = os.getenv("SILICONFLOW_API_KEY", "")
 SILICONFLOW_BASE_URL = "https://api.siliconflow.cn/v1"
+
+# ── Auth ───────────────────────────────────────────────────
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "change-me-in-production")
+JWT_ALGORITHM = "HS256"
+JWT_EXPIRE_HOURS = int(os.getenv("JWT_EXPIRE_HOURS", "72"))
 
 # ── Server ───────────────────────────────────────────────
 HOST = os.getenv("HOST", "0.0.0.0")

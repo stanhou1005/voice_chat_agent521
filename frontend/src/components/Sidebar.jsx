@@ -1,11 +1,12 @@
 import { useContext, useCallback, useEffect } from 'react';
 import { AppContext } from '../context/AppContext';
 import { _ensureWS } from '../App';
+import { getUsername } from '../services/auth';
 import * as api from '../services/api';
 
 const REFRESH_INTERVAL = 5000;
 
-export default function Sidebar({ onOpenSettings }) {
+export default function Sidebar({ onOpenSettings, onLogout }) {
   const { state, dispatch } = useContext(AppContext);
   const { sessions, currentSessionId } = state;
 
@@ -19,7 +20,7 @@ export default function Sidebar({ onOpenSettings }) {
   // Refresh after each turn completes
   useEffect(() => {
     _fetchSessions();
-  }, [state.status]); // status changes: processing → idle triggers refresh
+  }, [state.status]);
 
   async function _fetchSessions() {
     try {
@@ -33,12 +34,12 @@ export default function Sidebar({ onOpenSettings }) {
   const newChat = useCallback(() => {
     const id = crypto.randomUUID();
     dispatch({ type: 'NEW_SESSION', sessionId: id });
-    _ensureWS(id, dispatch);  // pre-create WebSocket for new session
+    _ensureWS(id, dispatch);
   }, [dispatch]);
 
   const selectSession = useCallback(
     async (id) => {
-      _ensureWS(id, dispatch);  // ensure WebSocket exists for this session
+      _ensureWS(id, dispatch);
       try {
         const data = await api.getSessionMessages(id);
         dispatch({ type: 'SELECT_SESSION', sessionId: id, messages: data.messages || [] });
@@ -51,6 +52,10 @@ export default function Sidebar({ onOpenSettings }) {
 
   return (
     <aside className="sidebar">
+      <div className="sidebar-user">
+        <span className="sidebar-username">{getUsername()}</span>
+      </div>
+
       <button className="btn-new-chat" onClick={newChat}>
         + 新建会话
       </button>
@@ -70,6 +75,10 @@ export default function Sidebar({ onOpenSettings }) {
         {sessions.length === 0 && (
           <p className="session-empty">暂无历史会话</p>
         )}
+      </div>
+
+      <div className="sidebar-footer">
+        <button className="btn-logout" onClick={onLogout}>退出登录</button>
       </div>
     </aside>
   );

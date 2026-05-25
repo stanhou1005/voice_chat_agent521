@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+*.egg
+.eggs/
+.pytest_cache/
+*.log
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment (contains secrets, mounted at runtime)
+.env
+config/.env
+
+# Git
+.git/
+.gitignore
+
+# Node (for frontend build context)
+node_modules/
+frontend/node_modules/

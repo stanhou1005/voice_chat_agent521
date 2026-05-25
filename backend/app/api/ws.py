@@ -9,6 +9,7 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 from app.agent.graph import run_agent
 from app.agent.nodes import CancelledError
+from app.core.auth import verify_token
 from app.db.langgraph import get_checkpointer, get_store, STORE_NAMESPACE
 from app.services.asr import recognize
 from app.services.tts import synthesize
@@ -42,10 +43,16 @@ async def _upsert_session(thread_id: str, user_text: str):
 
 
 @router.websocket("/ws/{session_id}")
-async def websocket_endpoint(ws: WebSocket, session_id: str):
+async def websocket_endpoint(ws: WebSocket, session_id: str, token: str = ""):
+    try:
+        payload = verify_token(token)
+    except Exception:
+        await ws.close(code=4001, reason="Authentication failed")
+        return
+
     await ws.accept()
     create_cancel_event(session_id)
-    logger.info(f"[{session_id}] WebSocket connected")
+    logger.info(f"[{session_id}] WebSocket connected (user: {payload.get('username')})")
 
     checkpointer = get_checkpointer()
 

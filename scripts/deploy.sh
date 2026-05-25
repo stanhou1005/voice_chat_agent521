@@ -1,0 +1,101 @@
+#!/usr/bin/env bash
+# ============================================================
+# deploy.sh — 首次部署 Voice Chat Agent
+# 用法: ./scripts/deploy.sh
+# ============================================================
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+cd "$PROJECT_DIR"
+
+echo "========================================"
+echo "  Voice Chat Agent — Docker 部署"
+echo "========================================"
+echo ""
+
+# ── 1. 检查依赖 ──
+if ! command -v docker &>/dev/null; then
+    echo "❌ 未找到 docker，请先安装 Docker Engine"
+    exit 1
+fi
+
+if docker compose version &>/dev/null; then
+    COMPOSE="docker compose"
+elif command -v docker-compose &>/dev/null; then
+    COMPOSE="docker-compose"
+else
+    echo "❌ 未找到 docker compose，请先安装 Docker Compose"
+    exit 1
+fi
+
+echo "[OK] Docker 环境检查通过"
+echo ""
+
+# ── 2. 检查配置文件 ──
+if [ ! -f config/.env ]; then
+    echo "⚠ 未找到 config/.env，正在从模板创建..."
+    cp config/.env.example config/.env
+    echo ""
+    echo "============================================"
+    echo "  请编辑 config/.env 填入真实 API key："
+    echo "    vim config/.env"
+    echo "  或  nano config/.env"
+    echo "============================================"
+    echo ""
+    echo "编辑完成后，重新运行: ./scripts/deploy.sh"
+    exit 0
+fi
+
+echo "[OK] 配置文件 config/.env 已就绪"
+echo ""
+
+# Source config for docker-compose variable substitution
+set -a; source config/.env; set +a
+
+# ── 3. 构建镜像 ──
+echo "正在构建 Docker 镜像..."
+$COMPOSE build --parallel
+echo "[OK] 镜像构建完成"
+echo ""
+
+# ── 4. 启动服务 ──
+echo "正在启动服务..."
+$COMPOSE up -d
+echo ""
+
+# ── 5. 等待健康检查通过 ──
+echo "等待服务就绪..."
+ATTEMPTS=0
+MAX_ATTEMPTS=30
+while [ $ATTEMPTS -lt $MAX_ATTEMPTS ]; do
+    if curl -sf http://localhost:80/health > /dev/null 2>&1; then
+        echo ""
+        echo "[OK] 所有服务已就绪"
+        break
+    fi
+    ATTEMPTS=$((ATTEMPTS + 1))
+    printf "."
+    sleep 3
+done
+
+if [ $ATTEMPTS -ge $MAX_ATTEMPTS ]; then
+    echo ""
+    echo "⚠ 服务启动超时，请检查日志:"
+    echo "   $COMPOSE logs --tail=50"
+    exit 1
+fi
+
+# ── 6. 完成 ──
+echo ""
+echo "========================================"
+echo "  部署完成！"
+echo ""
+echo "  创建管理员账号:"
+echo "    ./scripts/create-user.sh"
+echo ""
+echo "  查看日志:"
+echo "    $COMPOSE logs -f"
+echo ""
+echo "  访问地址: http://$(ip route get 1 2>/dev/null | awk '{print $7; exit}' || hostname -I 2>/dev/null | awk '{print $1}' || echo 'localhost')"
+echo "========================================"

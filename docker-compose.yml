@@ -4,33 +4,56 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: voice_chat
-    ports:
-      - "5432:5432"
+      POSTGRES_USER: "${PG_USER:-postgres}"
+      POSTGRES_PASSWORD: "${PG_PASSWORD:-postgres}"
+      POSTGRES_DB: "${PG_DB:-voice_chat}"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - ./pgdata:/var/lib/postgresql/data
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PG_USER:-postgres} -d ${PG_DB:-voice_chat}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   backend:
     build: ./backend
-    ports:
-      - "8000:8000"
     environment:
+      CONFIG_DIR: /config
       PG_HOST: postgres
       PG_PORT: "5432"
-      PG_USER: postgres
-      PG_PASSWORD: postgres
-      PG_DB: voice_chat
-      LLM_MODEL_NAME: deepseek-v4-pro
-      LLM_BASE_URL: https://api.deepseek.com/v1
-      LLM_API_KEY: ""
-      SILICONFLOW_API_KEY: ""
-      TAVILY_API_KEY: ""
-      PROXY_URL: ""
+      PG_USER: "${PG_USER:-postgres}"
+      PG_PASSWORD: "${PG_PASSWORD:-postgres}"
+      PG_DB: "${PG_DB:-voice_chat}"
+    env_file:
+      - ./config/.env
+    volumes:
+      - ./config:/config:ro
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health')\""]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  nginx:
+    build: ./frontend
+    ports:
+      - "${NGINX_PORT:-80}:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:80/ || exit 1"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
 
 volumes:
   pgdata:

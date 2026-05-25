@@ -20,7 +20,13 @@
       "Bash(curl -s http://localhost:8000/api/settings)",
       "Bash(curl -s http://localhost:8000/api/sessions)",
       "Bash(tasklist /FI \"IMAGENAME eq python.exe\")",
-      "Bash(powershell *)"
+      "Bash(powershell *)",
+      "Skill(daily-report)",
+      "Bash(docker-compose up *)",
+      "Bash(npm.cmd run *)",
+      "Bash(bash -n \"E:\\\\Career\\\\pyton_projects\\\\chat_agent521\\\\scripts\\\\deploy.sh\")",
+      "Bash(bash -n \"E:\\\\Career\\\\pyton_projects\\\\chat_agent521\\\\scripts\\\\reload-config.sh\")",
+      "Bash(bash -n \"E:\\\\Career\\\\pyton_projects\\\\chat_agent521\\\\scripts\\\\create-user.sh\")"
     ]
   }
 }
