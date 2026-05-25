@@ -2,6 +2,7 @@ import { useContext, useCallback, useEffect } from 'react';
 import { AppContext } from '../context/AppContext';
 import { _ensureWS } from '../App';
 import { getUsername } from '../services/auth';
+import { generateUUID } from '../utils/uuid';
 import * as api from '../services/api';
 
 const REFRESH_INTERVAL = 5000;
@@ -32,7 +33,7 @@ export default function Sidebar({ onOpenSettings, onLogout }) {
   }
 
   const newChat = useCallback(() => {
-    const id = crypto.randomUUID();
+    const id = generateUUID();
     dispatch({ type: 'NEW_SESSION', sessionId: id });
     _ensureWS(id, dispatch);
   }, [dispatch]);

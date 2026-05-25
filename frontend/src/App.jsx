@@ -4,6 +4,7 @@ import Sidebar from './components/Sidebar';
 import ChatPanel from './components/ChatPanel';
 import SettingsModal from './components/SettingsModal';
 import LoginPage from './components/LoginPage';
+import { generateUUID } from './utils/uuid';
 import { getToken, isAuthenticated, getUsername, logout } from './services/auth';
 
 // ── WebSocket pool: keeps connections alive across session switches ──
@@ -54,7 +55,7 @@ export default function App() {
   // Auto-create session on first load (only when authenticated)
   useEffect(() => {
     if (state.isAuthenticated && !state.currentSessionId) {
-      const id = crypto.randomUUID();
+      const id = generateUUID();
       dispatch({ type: 'NEW_SESSION', sessionId: id });
       _ensureWS(id, dispatch);
     }
