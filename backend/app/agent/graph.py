@@ -75,7 +75,7 @@ async def run_agent(
 
     try:
         result = await compiled.ainvoke(
-            {"input": user_input, "messages": [HumanMessage(content=user_input)]},
+            {"input": user_input, "messages": [HumanMessage(content=user_input)], "past_steps": [], "response": ""},
             config,
         )
 

@@ -3,7 +3,6 @@ Agent state (Plan-Execute-Replan) and tools.
 Matches the demo's PlanExecute pattern exactly.
 """
 
-import operator
 from datetime import datetime, timezone
 from typing import Annotated, TypedDict
 from langgraph.graph.message import add_messages
@@ -17,13 +16,13 @@ class AgentState(TypedDict):
     - messages: conversation history (add_messages reducer, for short-term memory)
     - input: current user question
     - plan: ordered steps to execute
-    - past_steps: (step_description, result) accumulated via operator.add
+    - past_steps: (step_description, result) — accumulates within a turn, reset between turns
     - response: final answer set by replan when work is done
     """
     messages: Annotated[list, add_messages]
     input: str
     plan: list[str]
-    past_steps: Annotated[list[tuple], operator.add]
+    past_steps: list[tuple]       # plain list — reset between turns
     response: str
 
 

@@ -168,7 +168,8 @@ async def execute_step(state: AgentState, config: RunnableConfig) -> dict:
     agent_response = await agent.ainvoke({"messages": [("user", task_formatted)]})
 
     result_content = agent_response["messages"][-1].content
-    return {"past_steps": [(task, result_content)]}
+    existing = state.get("past_steps", [])
+    return {"past_steps": existing + [(task, result_content)]}
 
 
 async def replan_step(state: AgentState, config: RunnableConfig) -> dict:
