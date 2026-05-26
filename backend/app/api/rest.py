@@ -20,12 +20,15 @@ async def list_sessions(limit: int = 50, offset: int = 0, user: dict = Depends(g
     """List historical sessions from LangGraph Store, sorted by last active time."""
     store = get_store()
     items = await store.asearch(STORE_NAMESPACE, limit=limit + offset, offset=0)
+    current_user_id = user.get("sub", "")
 
-    # Filter by TTL (Store handles TTL internally, but double-check here)
     cutoff = datetime.now(timezone.utc) - timedelta(seconds=STORE_TTL_SECONDS)
     sessions = []
     for item in items:
         v = item.value
+        # Filter by current user
+        if v.get("user_id") and str(v.get("user_id")) != str(current_user_id):
+            continue
         created = v.get("created_at", "")
         if created:
             try:
@@ -42,17 +45,25 @@ async def list_sessions(limit: int = 50, offset: int = 0, user: dict = Depends(g
             "message_count": v.get("message_count", 0),
         })
 
-    # Sort by last_active_at descending
     sessions.sort(key=lambda s: s["last_active_at"], reverse=True)
     sessions = sessions[offset:offset + limit]
 
     return {"sessions": sessions, "total": len(sessions)}
 
 
+async def _check_session_owner(session_id: str, user_id: str):
+    """Verify the session belongs to user_id. Raises 403 if not."""
+    store = get_store()
+    item = await store.aget(STORE_NAMESPACE, session_id)
+    if item and item.value.get("user_id") and str(item.value.get("user_id")) != str(user_id):
+        raise HTTPException(status_code=403, detail="Access denied")
+
+
 @router.get("/sessions/{session_id}/messages")
 async def get_session_messages(session_id: str, user: dict = Depends(get_current_user)):
     """Get message history from LangGraph checkpointer."""
     try:
+        await _check_session_owner(session_id, user.get("sub", ""))
         checkpointer = get_checkpointer()
         config = {"configurable": {"thread_id": session_id}}
         checkpoint = await checkpointer.aget(config)
@@ -89,6 +100,7 @@ async def get_session_messages(session_id: str, user: dict = Depends(get_current
 @router.delete("/sessions/{session_id}")
 async def delete_session(session_id: str, user: dict = Depends(get_current_user)):
     """Delete a session: remove from Store and its checkpoint data."""
+    await _check_session_owner(session_id, user.get("sub", ""))
     store = get_store()
     # 1. Remove from Store
     await store.adelete(STORE_NAMESPACE, session_id)

@@ -1,13 +1,13 @@
 import { useContext, useCallback, useEffect } from 'react';
 import { AppContext } from '../context/AppContext';
 import { _ensureWS } from '../App';
-import { getUsername } from '../services/auth';
+import { getUsername, isAdmin } from '../services/auth';
 import { generateUUID } from '../utils/uuid';
 import * as api from '../services/api';
 
 const REFRESH_INTERVAL = 5000;
 
-export default function Sidebar({ onOpenSettings, onLogout }) {
+export default function Sidebar({ onOpenSettings, onLogout, onOpenUserManagement }) {
   const { state, dispatch } = useContext(AppContext);
   const { sessions, currentSessionId } = state;
 
@@ -79,6 +79,9 @@ export default function Sidebar({ onOpenSettings, onLogout }) {
       </div>
 
       <div className="sidebar-footer">
+        {isAdmin() && (
+          <button className="btn-admin" onClick={onOpenUserManagement}>用户管理</button>
+        )}
         <button className="btn-logout" onClick={onLogout}>退出登录</button>
       </div>
     </aside>

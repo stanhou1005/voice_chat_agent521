@@ -19,7 +19,7 @@ logger = logging.getLogger("voice_chat.ws")
 router = APIRouter()
 
 
-async def _upsert_session(thread_id: str, user_text: str):
+async def _upsert_session(thread_id: str, user_text: str, user_id: str):
     """Create or update session metadata in LangGraph Store (long-term memory)."""
     from datetime import datetime, timezone
     store = get_store()
@@ -37,6 +37,7 @@ async def _upsert_session(thread_id: str, user_text: str):
             "created_at": datetime.now(timezone.utc).isoformat(),
             "last_active_at": datetime.now(timezone.utc).isoformat(),
             "message_count": 2,
+            "user_id": user_id,
         }
 
     await store.aput(STORE_NAMESPACE, thread_id, value)
@@ -50,6 +51,7 @@ async def websocket_endpoint(ws: WebSocket, session_id: str, token: str = ""):
         await ws.close(code=4001, reason="Authentication failed")
         return
 
+    user_id = payload.get("sub", "")
     await ws.accept()
     create_cancel_event(session_id)
     logger.info(f"[{session_id}] WebSocket connected (user: {payload.get('username')})")
@@ -90,7 +92,7 @@ async def websocket_endpoint(ws: WebSocket, session_id: str, token: str = ""):
                         continue
 
                     # 3. Create session metadata on first message
-                    await _upsert_session(session_id, text)
+                    await _upsert_session(session_id, text, user_id)
 
                     # 4. Thinking + agent
                     await ws.send_json({"type": "thinking", "status": "start"})

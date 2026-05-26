@@ -3,9 +3,10 @@ import { AppContext, appReducer, initialState } from './context/AppContext';
 import Sidebar from './components/Sidebar';
 import ChatPanel from './components/ChatPanel';
 import SettingsModal from './components/SettingsModal';
+import UserManagement from './components/UserManagement';
 import LoginPage from './components/LoginPage';
 import { generateUUID } from './utils/uuid';
-import { getToken, isAuthenticated, getUsername, logout } from './services/auth';
+import { getToken, isAuthenticated, getUsername, getRole, logout } from './services/auth';
 
 // ── WebSocket pool: keeps connections alive across session switches ──
 const wsPoolRef = { current: {} }; // { sessionId: WebSocket }
@@ -48,7 +49,7 @@ export default function App() {
   // Check existing auth on mount
   useEffect(() => {
     if (isAuthenticated()) {
-      dispatch({ type: 'SET_AUTH', username: getUsername() });
+      dispatch({ type: 'SET_AUTH', username: getUsername(), role: getRole() });
     }
   }, []);
 
@@ -71,9 +72,11 @@ export default function App() {
   const openSettings = useCallback(() => dispatch({ type: 'TOGGLE_SETTINGS', open: true }), []);
   const closeSettings = useCallback(() => dispatch({ type: 'TOGGLE_SETTINGS', open: false }), []);
 
-  const handleLogin = useCallback((username) => {
-    dispatch({ type: 'SET_AUTH', username });
+  const handleLogin = useCallback((username, role) => {
+    dispatch({ type: 'SET_AUTH', username, role });
   }, []);
+
+  const toggleUserManagement = useCallback(() => dispatch({ type: 'TOGGLE_USER_MANAGEMENT' }), []);
 
   const handleLogout = useCallback(() => {
     logout();
@@ -89,9 +92,10 @@ export default function App() {
   return (
     <AppContext.Provider value={{ state, dispatch }}>
       <div className="app-container">
-        <Sidebar onOpenSettings={openSettings} onLogout={handleLogout} />
+        <Sidebar onOpenSettings={openSettings} onLogout={handleLogout} onOpenUserManagement={toggleUserManagement} />
         <ChatPanel onOpenSettings={openSettings} onLogout={handleLogout} />
         <SettingsModal isOpen={state.settingsModalOpen} onClose={closeSettings} />
+        <UserManagement isOpen={state.userManagementOpen} onClose={toggleUserManagement} />
       </div>
     </AppContext.Provider>
   );

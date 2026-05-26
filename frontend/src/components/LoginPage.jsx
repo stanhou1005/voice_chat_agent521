@@ -15,7 +15,7 @@ export default function LoginPage({ onLogin }) {
     setLoading(true);
     try {
       const data = await login(username.trim(), password);
-      onLogin(data.username);
+      onLogin(data.username, data.role || 'user');
     } catch (err) {
       setError(err.message);
     } finally {

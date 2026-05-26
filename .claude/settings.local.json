@@ -26,7 +26,10 @@
       "Bash(npm.cmd run *)",
       "Bash(bash -n \"E:\\\\Career\\\\pyton_projects\\\\chat_agent521\\\\scripts\\\\deploy.sh\")",
       "Bash(bash -n \"E:\\\\Career\\\\pyton_projects\\\\chat_agent521\\\\scripts\\\\reload-config.sh\")",
-      "Bash(bash -n \"E:\\\\Career\\\\pyton_projects\\\\chat_agent521\\\\scripts\\\\create-user.sh\")"
+      "Bash(bash -n \"E:\\\\Career\\\\pyton_projects\\\\chat_agent521\\\\scripts\\\\create-user.sh\")",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)"
     ]
   }
 }

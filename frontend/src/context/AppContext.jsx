@@ -11,11 +11,13 @@ const _emptySession = () => ({
 export const initialState = {
   isAuthenticated: false,
   username: null,
+  role: null,
   currentSessionId: null,
   sessions: [],
   // Per-session state: { [sessionId]: { messages, status, statusText } }
   sessionStates: {},
   settingsModalOpen: false,
+  userManagementOpen: false,
   error: null,
 };
 
@@ -197,14 +199,18 @@ export function appReducer(state, action) {
     case 'TOGGLE_SETTINGS':
       return { ...state, settingsModalOpen: action.open };
 
+    case 'TOGGLE_USER_MANAGEMENT':
+      return { ...state, userManagementOpen: !state.userManagementOpen };
+
     case 'SET_AUTH':
-      return { ...state, isAuthenticated: true, username: action.username };
+      return { ...state, isAuthenticated: true, username: action.username, role: action.role };
 
     case 'LOGOUT':
       return {
         ...initialState,
         isAuthenticated: false,
         username: null,
+        role: null,
       };
 
     default:

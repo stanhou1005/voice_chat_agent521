@@ -43,3 +43,34 @@ export async function updateSettings(data) {
   });
   return res.json();
 }
+
+export async function getUsers() {
+  const res = await fetch(`${BASE}/auth/users`, {
+    headers: authHeaders(),
+  });
+  return res.json();
+}
+
+export async function createUser(username, password, role = 'user') {
+  const res = await fetch(`${BASE}/auth/users`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify({ username, password, role }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: 'Failed' }));
+    throw new Error(err.detail || 'Failed');
+  }
+  return res.json();
+}
+
+export async function deleteUser(userId) {
+  const res = await fetch(`${BASE}/auth/users/${userId}`, {
+    method: 'DELETE',
+    headers: authHeaders(),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: 'Failed' }));
+    throw new Error(err.detail || 'Failed');
+  }
+}
