@@ -10,13 +10,29 @@ export default function SettingsModal({ isOpen, onClose }) {
     proxy_url: '',
   });
   const [saved, setSaved] = useState(false);
+  const [oldPw, setOldPw] = useState('');
+  const [newPw, setNewPw] = useState('');
+  const [pwMsg, setPwMsg] = useState('');
+  const [pwBusy, setPwBusy] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
       api.getSettings().then(setForm).catch(console.error);
       setSaved(false);
+      setOldPw(''); setNewPw(''); setPwMsg('');
     }
   }, [isOpen]);
+
+  const handleChangePw = useCallback(async () => {
+    if (!oldPw || !newPw) { setPwMsg('请填写新旧密码'); return; }
+    setPwBusy(true); setPwMsg('');
+    try {
+      await api.changePassword(oldPw, newPw);
+      setPwMsg('密码已修改');
+      setOldPw(''); setNewPw('');
+    } catch (e) { setPwMsg(e.message); }
+    finally { setPwBusy(false); }
+  }, [oldPw, newPw]);
 
   const handleChange = useCallback((e) => {
     const { name, value } = e.target;
@@ -55,6 +71,19 @@ export default function SettingsModal({ isOpen, onClose }) {
           <button className="btn-save" onClick={handleSave}>保存</button>
           <button className="btn-close" onClick={onClose}>关闭</button>
           {saved && <span className="saved-hint">已保存</span>}
+        </div>
+
+        <hr className="settings-divider" />
+        <h3>修改密码</h3>
+        <label>旧密码</label>
+        <input type="password" value={oldPw} onChange={e => setOldPw(e.target.value)} placeholder="当前密码" />
+        <label>新密码</label>
+        <input type="password" value={newPw} onChange={e => setNewPw(e.target.value)} placeholder="新密码" />
+        <div className="modal-actions">
+          <button className="btn-save" onClick={handleChangePw} disabled={pwBusy}>
+            {pwBusy ? '修改中…' : '修改密码'}
+          </button>
+          {pwMsg && <span className={pwMsg.includes('已修改') ? 'saved-hint' : 'login-error'} style={{fontSize:12}}>{pwMsg}</span>}
         </div>
       </div>
     </div>

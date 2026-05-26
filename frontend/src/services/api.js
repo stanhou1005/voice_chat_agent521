@@ -74,3 +74,27 @@ export async function deleteUser(userId) {
     throw new Error(err.detail || 'Failed');
   }
 }
+
+export async function changePassword(oldPassword, newPassword) {
+  const res = await fetch(`${BASE}/auth/password`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify({ old_password: oldPassword, new_password: newPassword }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: 'Failed' }));
+    throw new Error(err.detail || 'Failed');
+  }
+}
+
+export async function resetUserPassword(userId, newPassword) {
+  const res = await fetch(`${BASE}/auth/users/${userId}/password`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify({ password: newPassword }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: 'Failed' }));
+    throw new Error(err.detail || 'Failed');
+  }
+}

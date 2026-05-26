@@ -1,6 +1,33 @@
 import { useState, useEffect } from 'react';
 import * as api from '../services/api';
 
+function ResetPassword({ userId, username, onDone }) {
+  const [pw, setPw] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState('');
+
+  async function handleReset(e) {
+    e.preventDefault();
+    if (!pw) return;
+    setBusy(true); setErr('');
+    try {
+      await api.resetUserPassword(userId, pw);
+      setPw('');
+      onDone();
+    } catch (e) { setErr(e.message); }
+    finally { setBusy(false); }
+  }
+
+  return (
+    <form className="reset-pw-form" onSubmit={handleReset}>
+      <input type="password" value={pw} onChange={e => setPw(e.target.value)}
+        placeholder={`${username} 新密码`} className="reset-pw-input" />
+      <button type="submit" className="btn-save" disabled={busy} style={{margin:0}}>改密</button>
+      {err && <span className="login-error" style={{fontSize:11}}>{err}</span>}
+    </form>
+  );
+}
+
 export default function UserManagement({ isOpen, onClose }) {
   const [users, setUsers] = useState([]);
   const [newUsername, setNewUsername] = useState('');
@@ -79,10 +106,13 @@ export default function UserManagement({ isOpen, onClose }) {
                 <strong>{u.username}</strong>
                 <span className="user-role-tag">{u.role === 'admin' ? '管理员' : '普通用户'}</span>
               </span>
-              <button
-                className="btn-delete-user"
-                onClick={() => handleDelete(u.id, u.username)}
-              >删除</button>
+              <span className="user-actions">
+                <ResetPassword userId={u.id} username={u.username} onDone={() => {}} />
+                <button
+                  className="btn-delete-user"
+                  onClick={() => handleDelete(u.id, u.username)}
+                >删除</button>
+              </span>
             </div>
           ))}
           {users.length === 0 && <p className="session-empty">暂无用户</p>}

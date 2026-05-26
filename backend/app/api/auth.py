@@ -62,3 +62,38 @@ async def delete_user(user_id: int, user: dict = Depends(get_current_admin)):
 
     await target.delete()
     return {"status": "ok"}
+
+
+@router.put("/api/auth/users/{user_id}/password")
+async def reset_user_password(user_id: int, data: dict, user: dict = Depends(get_current_admin)):
+    """Admin resets any user's password."""
+    new_password = data.get("password", "")
+    if not new_password:
+        raise HTTPException(status_code=400, detail="Password required")
+
+    target = await User.filter(id=user_id).first()
+    if not target:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    target.password_hash = hash_password(new_password)
+    await target.save()
+    return {"status": "ok"}
+
+
+# ─── Self-service password change ────────────────────────
+
+@router.put("/api/auth/password")
+async def change_password(data: dict, user: dict = Depends(get_current_user)):
+    """Any authenticated user changes their own password."""
+    old_password = data.get("old_password", "")
+    new_password = data.get("new_password", "")
+    if not old_password or not new_password:
+        raise HTTPException(status_code=400, detail="Old and new password required")
+
+    current_user = await User.filter(id=int(user.get("sub", 0))).first()
+    if not current_user or not verify_password(old_password, current_user.password_hash):
+        raise HTTPException(status_code=401, detail="Old password is incorrect")
+
+    current_user.password_hash = hash_password(new_password)
+    await current_user.save()
+    return {"status": "ok"}

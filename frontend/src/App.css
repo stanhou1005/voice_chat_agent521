@@ -458,3 +458,23 @@ body {
   cursor: pointer;
 }
 .btn-delete-user:hover { background: #a00000; }
+
+/* ---- User Management: reset password ---- */
+.user-actions { display: flex; gap: 6px; align-items: center; }
+.reset-pw-form { display: flex; gap: 4px; align-items: center; }
+.reset-pw-input {
+  width: 100px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  border: 1px solid #0f3460;
+  background: #0a0f1a;
+  color: #e0e0e0;
+  font-size: 11px;
+}
+
+/* ---- Settings divider ---- */
+.settings-divider {
+  border: none;
+  border-top: 1px solid #0f3460;
+  margin: 16px 0 8px;
+}

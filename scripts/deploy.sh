@@ -107,13 +107,22 @@ if [ $ATTEMPTS -ge $MAX_ATTEMPTS ]; then
     exit 1
 fi
 
-# ── 8. 完成 ──
+# ── 8. 创建默认管理员 ──
+echo ""
+echo "正在创建默认管理员账号..."
+$COMPOSE exec -T backend python -m scripts.create_user --username admin --password admin123 --role admin 2>/dev/null && \
+    echo "[OK] 默认管理员: admin / admin123" || \
+    echo "[OK] 管理员账号已存在，跳过"
+
+# ── 9. 完成 ──
 echo ""
 echo "========================================"
 echo "  部署完成！"
 echo ""
-echo "  创建管理员账号:"
-echo "    ./scripts/create-user.sh"
+echo "  默认管理员账号: admin / admin123"
+echo "  登录后请立即修改密码（点击右上角齿轮）"
+echo ""
+echo "  创建其他用户: 管理员登录后点击侧栏「用户管理」"
 echo ""
 echo "  访问地址: https://$(hostname -I 2>/dev/null | awk '{print $1}' || ip route get 1 2>/dev/null | awk '{print $7; exit}' || echo '服务器IP')"
 echo ""
