@@ -8,6 +8,7 @@ export default function useWebSocket(sessionId) {
   const { dispatch } = useContext(AppContext);
   const timeoutRef = useRef(null);
   const pingRef = useRef(null);
+  const audioRef = useRef(null);  // currently playing Audio
 
   useEffect(() => {
     if (!sessionId) return;
@@ -48,8 +49,7 @@ export default function useWebSocket(sessionId) {
           dispatch({ type: 'APPEND_BOT_MESSAGE', text: msg.text, sessionId });
           break;
         case 'bot_audio':
-          try { _playAudio(msg.data); } catch (e) { console.error('[WS] Audio play failed:', e); }
-          // Always reset status regardless of audio success
+          try { _playAudio(msg.data, audioRef); } catch (e) { console.error('[WS] Audio play failed:', e); }
           setTimeout(() => dispatch({ type: 'SET_STATUS', status: 'idle', sessionId }), 500);
           break;
         case 'cancelled':
@@ -80,7 +80,7 @@ export default function useWebSocket(sessionId) {
       }, 30000);
     }
 
-    // Expose send/cancel for the CURRENT session
+    // Expose send/cancel/stopAudio for the CURRENT session
     window.__wsSend = (data) => {
       if (ws.readyState === WebSocket.OPEN) {
         console.log('[WS] →', JSON.parse(data).type);
@@ -95,21 +95,33 @@ export default function useWebSocket(sessionId) {
         ws.send(JSON.stringify({ type: 'cancel' }));
       }
     };
+    window.__stopAudio = () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
 
     return () => {
       ws.removeEventListener('message', handler);
       clearInterval(pingRef.current);
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      window.__stopAudio?.();
       // NOTE: do NOT close the WebSocket — other components may still use it
     };
   }, [sessionId, dispatch]);
 }
 
-function _playAudio(base64Data) {
+function _playAudio(base64Data, audioRef) {
+  if (audioRef.current) {
+    audioRef.current.pause();
+    audioRef.current = null;
+  }
   const blob = _base64ToBlob(base64Data, 'audio/mp3');
   const url = URL.createObjectURL(blob);
   const audio = new Audio(url);
-  audio.onended = () => URL.revokeObjectURL(url);
+  audio.onended = () => { URL.revokeObjectURL(url); audioRef.current = null; };
+  audioRef.current = audio;
   audio.play().catch(console.error);
 }
 

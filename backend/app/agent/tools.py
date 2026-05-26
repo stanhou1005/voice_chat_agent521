@@ -1,13 +1,13 @@
 """
 Agent state (Plan-Execute-Replan) and tools.
-Matches the demo's PlanExecute pattern exactly.
 """
 
 from datetime import datetime, timezone
 from typing import Annotated, TypedDict
 from langgraph.graph.message import add_messages
 from langchain_core.tools import tool
-from langchain_tavily import TavilySearch
+
+from app.services.tavily import get_tavily_tool
 
 
 class AgentState(TypedDict):
@@ -26,12 +26,19 @@ class AgentState(TypedDict):
     response: str
 
 
-# ── Tools (same pattern as demo) ───────────────────────
+# ── Tools ───────────────────────────────────────────────
 
-tavily_search_tool = TavilySearch(
-    max_results=3,
-    search_depth="advanced",
-)
+@tool
+def tavily_search_tool(query: str) -> str:
+    """Search the web for current information. Use this for facts, news, or any
+    up-to-date information you don't know."""
+    tool = get_tavily_tool()
+    result = tool.invoke({"query": query})
+    if isinstance(result, str):
+        return result
+    if isinstance(result, list):
+        return "\n\n".join(str(r) for r in result[:3])
+    return str(result)
 
 
 @tool

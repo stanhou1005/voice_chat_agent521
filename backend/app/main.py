@@ -68,6 +68,9 @@ async def lifespan(_app: FastAPI):
     )
     await Tortoise.generate_schemas()
     await _sync_config_to_db()
+    # Load Tavily keys into memory (for multi-key support)
+    from app.services.tavily import reload_keys
+    await reload_keys()
     await init_checkpointer()
     await init_store()
     scheduler = start_scheduler()

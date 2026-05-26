@@ -49,6 +49,7 @@ export default function ChatPanel({ onOpenSettings, onLogout }) {
       dispatch({ type: 'ERROR', sessionId: currentSessionId, message:'WebSocket 未连接，请刷新页面' });
       return;
     }
+    window.__stopAudio?.();
     setSilenceCountdown(null);
     dispatch({ type: 'SET_STATUS', status: 'recording', sessionId: currentSessionId });
     try {

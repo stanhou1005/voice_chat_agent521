@@ -1,41 +1,53 @@
 """
 Tavily Search API wrapper — uses langchain_tavily for LangGraph tool compatibility.
+Supports multiple API keys (comma-separated) with random selection to spread quota.
 """
 
+import random
 from langchain_tavily import TavilySearch
 from app.models.settings import Settings
 
-_tool: TavilySearch | None = None
+
+def _parse_keys(raw: str) -> list[str]:
+    """Parse comma/whitespace separated API keys, filter empties."""
+    if not raw:
+        return []
+    return [k.strip() for k in raw.replace("\n", ",").split(",") if k.strip()]
 
 
-async def get_tavily_tool() -> TavilySearch:
-    """Get or create TavilySearch tool instance from DB settings."""
-    global _tool
-    if _tool is not None:
-        return _tool
+def _pick_key() -> str:
+    return random.choice(_keys) if _keys else ""
 
-    settings = await Settings.get_singleton()
+
+_keys: list[str] = []
+
+
+async def reload_keys():
+    """Reload Tavily API keys from DB settings. Call on startup and after settings change."""
+    global _keys
+    try:
+        settings = await Settings.get_singleton()
+        _keys = _parse_keys(settings.tavily_key)
+    except Exception:
+        _keys = []
+
+
+def get_tavily_tool() -> TavilySearch:
+    """Get a TavilySearch instance with a randomly chosen API key."""
     kwargs: dict = {
         "max_results": 3,
-        "search_depth": "basic",
+        "search_depth": "advanced",
     }
-    if settings.tavily_key:
-        kwargs["tavily_api_key"] = settings.tavily_key
-    if settings.proxy_url:
-        kwargs["tavily_api_url"] = settings.proxy_url
-
-    _tool = TavilySearch(**kwargs)
-    return _tool
+    key = _pick_key()
+    if key:
+        kwargs["tavily_api_key"] = key
+    return TavilySearch(**kwargs)
 
 
 async def tavily_search(query: str) -> dict:
-    """
-    Execute a Tavily search query via langchain_tavily.
-    Returns raw Tavily response dict.
-    """
-    tool = await get_tavily_tool()
+    """Execute a Tavily search query. Returns normalized dict."""
+    tool = get_tavily_tool()
     result = tool.invoke({"query": query})
-    # result is a string (formatted search results) or list — normalize to dict
     if isinstance(result, str):
         return {"results": [{"content": result, "snippet": result[:200]}]}
     if isinstance(result, list):

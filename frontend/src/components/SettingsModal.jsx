@@ -61,7 +61,7 @@ export default function SettingsModal({ isOpen, onClose }) {
         <label>模型 API Key</label>
         <input name="api_key" type="password" value={form.api_key} onChange={handleChange} />
 
-        <label>Tavily Search API Key</label>
+        <label>Tavily Search API Key（多 key 逗号分隔）</label>
         <input name="tavily_key" type="password" value={form.tavily_key} onChange={handleChange} />
 
         <label>代理地址（可选）</label>
